@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local credentials and environment files
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Local caches and generated artifacts
+.cache/
+cache/
+output/
+tmp/
+.codex-finalizer/
+
+# Large partial/downloaded map files; app uses bengaluru_grid.graphml
+*.part.graphml
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
