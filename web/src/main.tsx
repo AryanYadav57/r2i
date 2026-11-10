@@ -2,7 +2,8 @@ import { BookOpen, Circle, FileText, Map as MapIcon, Route, Sparkles, Truck } fr
 import { Component, StrictMode, Suspense, lazy, useEffect, useState, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
-// Tabs load on demand; once visited they stay mounted (hidden) so the map is never rebuilt.
+// Tabs load on demand. Only the active tab is mounted: every map holds WebGL contexts and browsers
+// drop the oldest ones past ~16, which blanked the Map tab's base map after visiting several tabs.
 const StoryTab = lazy(() => import("./tabs/StoryTab"));
 const MapTab = lazy(() => import("./tabs/MapTab"));
 const FleetTab = lazy(() => import("./tabs/FleetTab"));
@@ -42,12 +43,9 @@ function App() {
     window.addEventListener("popstate", onHash);
     return () => { window.removeEventListener("hashchange", onHash); window.removeEventListener("popstate", onHash); };
   }, []);
-  const [visited, setVisited] = useState<TabId[]>([tab]);
   const go = (id: TabId) => {
     setTab(id); history.replaceState(null, "", `#${id}`);
-    setVisited((v) => (v.includes(id) ? v : [...v, id]));
   };
-  useEffect(() => { setVisited((v) => (v.includes(tab) ? v : [...v, tab])); }, [tab]);
   useEffect(() => {
     const idle = (cb: () => void) => ("requestIdleCallback" in window ? (window as any).requestIdleCallback(cb, { timeout: 4000 }) : setTimeout(cb, 2500));
     idle(() => { import("./tabs/MapTab"); import("./tabs/FleetTab"); import("./tabs/StoryTab"); });
@@ -75,7 +73,7 @@ function App() {
           <Circle size={8} fill="currentColor" aria-hidden="true" />{live === null ? "Connecting…" : live ? "Live engine" : "Demo data"}
         </span>
       </header>
-      {TABS.filter((t) => visited.includes(t.id)).map(({ id, el: Tab }) => (
+      {TABS.filter((t) => t.id === tab).map(({ id, el: Tab }) => (
         <main key={id} className="stage" role="tabpanel" hidden={id !== tab} aria-hidden={id !== tab}>
           <TabBoundary>
             <Suspense fallback={<div className="stage loading">Loading…</div>}>

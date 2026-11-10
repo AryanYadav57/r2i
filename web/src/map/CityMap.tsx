@@ -55,6 +55,7 @@ export default function CityMap({ layers, initial = BENGALURU, flyTo, onClick, g
   const overlayRef = useRef<MapboxOverlay | null>(null);
   const pendingFly = useRef<FlyTarget | null>(null);
   const [ready, setReady] = useState(false);
+  const [generation, setGeneration] = useState(0);   // bumps to rebuild the map after a lost WebGL context
 
   // Create once.
   useEffect(() => {
@@ -68,6 +69,11 @@ export default function CityMap({ layers, initial = BENGALURU, flyTo, onClick, g
       interactive: interactive && !viewState, dragRotate: true,
     });
     map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+    // If the browser drops this map's WebGL context, rebuild the map instead of leaving it blank.
+    const onLost = (e: Event) => { e.preventDefault(); setGeneration((g) => g + 1); };
+    map.getCanvas().addEventListener("webglcontextlost", onLost);
+    // Retry tiles that failed to load (a single bad response must not leave holes for good).
+    map.on("error", (ev) => { if ((ev as { tile?: unknown }).tile) setTimeout(() => map.triggerRepaint(), 1500); });
     const overlay = new MapboxOverlay({ interleaved: false, useDevicePixels: DPR, layers: [] });
     map.addControl(overlay as unknown as maplibregl.IControl);
     map.once("render", () => setReady(true));
@@ -96,9 +102,9 @@ export default function CityMap({ layers, initial = BENGALURU, flyTo, onClick, g
     if (import.meta.env.DEV) ((window as unknown as { __maps?: maplibregl.Map[] }).__maps ??= []).push(map);   // dev-only inspection hook
     mapRef.current = map;
     overlayRef.current = overlay;
-    return () => { ro.disconnect(); clearTimeout(fallback); map.remove(); mapRef.current = null; overlayRef.current = null; };
+    return () => { map.getCanvas().removeEventListener("webglcontextlost", onLost); ro.disconnect(); clearTimeout(fallback); overlay.finalize(); map.remove(); mapRef.current = null; overlayRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [generation]);
 
   // Layers, picking and tooltips: cheap, every render.
   useEffect(() => {
