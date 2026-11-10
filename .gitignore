@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Large OSM / Data Files (keep .gitkeep)
+data/raw/*.graphml
+data/processed/*.csv
+data/processed/*.pkl
+data/processed/*.json
+!data/raw/.gitkeep
+# The prepared road graph ships with the repo so a fresh clone / container runs offline
+!data/raw/koramangala.graphml
+!data/processed/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# pip temp/cache dirs (redirected to E:\ due to C:\ space constraints)
+E:/pip_temp/
+E:/pip_cache/
+
+
+.superpowers/
+
+.env
+
+# OSMnx HTTP cache (re-downloadable)
+cache/
+
+# Local tooling / build artifacts
+.claude/
+*.tsbuildinfo

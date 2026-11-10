@@ -1,0 +1,14 @@
+.git
+.venv
+**/__pycache__
+**/.pytest_cache
+web/node_modules
+web/dist
+lab
+notebooks
+cache
+docs
+.env
+.superpowers
+.claude
+*.gif
